@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Space, Button, Modal, Form, Input, InputNumber, Breadcrumb } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Console } from 'console';
 const { confirm } = Modal;
 
@@ -75,7 +75,7 @@ interface Team {
 const columns: ColumnsType<DataType> = [
   {
     title: 'ID',
-    dataIndex: 'key',
+    dataIndex: 'id',
     key: 'key',
     render: text => <a>{text}</a>,
   },
@@ -118,50 +118,37 @@ const columns: ColumnsType<DataType> = [
   ), 
   },
   {
-    title: 'Action',
+    title: <a href='#' onClick={showModal}>Create</a>,           
     key: 'action',
     render: (_, record) => (
       <Space size="middle">
-        <a href='#'><Button onClick={showModal} type="primary">Edit</Button></a>
-        <a href='#'><Button onClick={showDeleteConfirm}>Delete</Button></a>
+        <a href='#'><Button onClick={showModal} type="primary"><EditOutlined /></Button></a>
+        <a href='#'><Button onClick={showDeleteConfirm} type="primary" danger><DeleteOutlined /></Button></a>
       </Space>
     ),
   },
 ];
 
+const [data, setData] = useState([]);
+useEffect(() => {
+  fetch("http://103.143.143.216:5000/api/work/all")
+    .then(res => res.json())
+    .then(
+      (result) => {
+        console.log(result)
+        setData(result);
+      },
+      // Note: it's important to handle errors here
+      // instead of a catch() block so that we don't swallow
+      // exceptions from actual bugs in components.
+      (error) => {
+        console.log(error)
+      }
+    )
+}, [])
 
-const data: DataType[] = [
-  {
-    "key" : '47547',
-    "name" : "CRUD",
-    "content" : "Thêm sửa xóa",
-    "start_time" : "31-12-2021",
-    "end_time" : "31-12-2021",
-    "progress" : 90,
-    "status" : "On",
-    "team" : {
-      "id" : '54353',
-      "name" : "fixbugs2",
-      "leader" : "Tuần",
-      "member" : ["Vĩnh", "Tình", "Đức"]
-    }
-  },
-  {
-    "key" : '412321',
-    "name" : "CRUD",
-    "content" : "Thêm sửa xóa",
-    "start_time" : "31-12-2021",
-    "end_time" : "31-12-2021",
-    "progress" : 90,
-    "status" : "On",
-    "team" : {
-      "id" : '54232',
-      "name" : "fixbugs1",
-      "leader" : "Tuần",
-      "member" : ["Vĩnh", "Tình", "Đức"]
-    }
-  }
-];
+const [name, setName] = useState("");
+
 
   return (
     <>
@@ -176,7 +163,7 @@ const data: DataType[] = [
       <Modal title="Edit User" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Form {...layout} name="nest-messages" validateMessages={validateMessages}>
           <Form.Item name={['user', 'name']} label="Name" rules={[{ required: true }]}>
-            <Input />
+            <Input name='name'/>
           </Form.Item>
           <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]}>
             <Input />
