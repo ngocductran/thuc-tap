@@ -1,0 +1,22 @@
+.logo {
+    height: 50px;
+    margin: 16px;
+    background: #fff;
+    color: #000;
+    text-align: center;
+}
+
+.site-layout .site-layout-background {
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.site-layout .site-layout-background span{
+    padding: 0 20px;
+}
+
+.ant-modal-footer{
+    display: none;
+}
