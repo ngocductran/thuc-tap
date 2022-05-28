@@ -6,11 +6,37 @@ import { Console } from 'console';
 const { confirm } = Modal;
 
 
+interface DataType {
+  id: string;
+  name: string;
+  content: string;
+  start_time: string;
+	end_time: string;
+	progress: number;
+	status: string;
+  team: Team;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  leader: string;
+  member: string[];
+}
+
+
 const App: React.FC = () => {
 
 const [isModalVisible, setIsModalVisible] = useState(false);
 
-const showModal = () => {
+const [name, setName] = useState()
+
+//đổ dữ liệu vào model
+// function setValueModel(data:DataType){
+//   console.log(data.name)
+// }
+function showModal(value:string) {
+
   setIsModalVisible(true);
 };
 
@@ -21,7 +47,7 @@ const handleOk = () => {
 const handleCancel = () => {
   setIsModalVisible(false);
 };
-const showDeleteConfirm = () => {
+const showDeleteConfirm = (id:string) => {
   confirm({
     title: 'Are you sure delete this task?',
     icon: <ExclamationCircleOutlined />,
@@ -30,7 +56,23 @@ const showDeleteConfirm = () => {
     okType: 'danger',
     cancelText: 'No',
     onOk() {
+      fetch("http://103.143.143.216:5000/api/work/del/"+id)
+        .then(res => res.json())
+        .then(
+          (result) => {
+            console.log(result)
+            setData(result);
+          },
+          // Note: it's important to handle errors here
+          // instead of a catch() block so that we don't swallow
+          // exceptions from actual bugs in components.
+          (error) => {
+            console.log(error)
+          }
+        )
+
       console.log('OK');
+
     },
     onCancel() {
       console.log('Cancel');
@@ -54,29 +96,12 @@ const validateMessages = {
   },
 };
 
-interface DataType {
-  key: string;
-  name: string;
-  content: string;
-  start_time: string;
-	end_time: string;
-	progress: number;
-	status: string;
-  team: Team;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  leader: string;
-  member: string[];
-}
 
 const columns: ColumnsType<DataType> = [
   {
     title: 'ID',
     dataIndex: 'id',
-    key: 'key',
+    key: 'id',
     render: text => <a>{text}</a>,
   },
   {
@@ -118,12 +143,12 @@ const columns: ColumnsType<DataType> = [
   ), 
   },
   {
-    title: <a href='#' onClick={showModal}>Create</a>,           
+    title: "",           
     key: 'action',
-    render: (_, record) => (
+    render: (_, {id}) => (
       <Space size="middle">
-        <a href='#'><Button onClick={showModal} type="primary"><EditOutlined /></Button></a>
-        <a href='#'><Button onClick={showDeleteConfirm} type="primary" danger><DeleteOutlined /></Button></a>
+        <a href='#'><Button onClick={()=>showModal(id)} type="primary"><EditOutlined /></Button></a>
+        <a href='#'><Button onClick={()=>showDeleteConfirm(id)} type="primary" danger><DeleteOutlined /></Button></a>
       </Space>
     ),
   },
@@ -146,8 +171,6 @@ useEffect(() => {
       }
     )
 }, [])
-
-const [name, setName] = useState("");
 
 
   return (
