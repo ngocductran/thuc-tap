@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Table, Space, Button, Modal, Form, Input, InputNumber, Breadcrumb, DatePicker, Slider, TreeSelect, message } from 'antd';
-import type { ColumnsType } from 'antd/lib/table';
-import { ExclamationCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Space, Button, Modal, Form, Input, InputNumber, Breadcrumb, DatePicker, Slider, TreeSelect, message, Progress, Tag } from 'antd';
+import type { ColumnsType, TablePaginationConfig } from 'antd/lib/table';
+import { ExclamationCircleOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 const { confirm } = Modal;
 
@@ -34,10 +34,17 @@ const [reload, setReload] = useState(true)
 
 
 const [data, setData] = useState([]);
+
+
 const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY'];
 
 const [infoTeam, setInfoTeam] = useState()
 const [idWork, setIdWork] = useState("")
+
+function addModal(){
+
+  setIsModalVisible(true);
+}
 
 function showModal(id:string) {
 
@@ -79,8 +86,6 @@ const error = () => {
 
 
 const handleOk = () => {
-
-
   const post = {
     'id' :idWork,
     'name' : form.getFieldsValue().name,
@@ -156,6 +161,7 @@ const validateMessages = {
   },
 };
 
+let color = ""
 
 const columns: ColumnsType<DataType> = [
   {
@@ -189,11 +195,19 @@ const columns: ColumnsType<DataType> = [
     title: 'Tiến độ',
     dataIndex: 'progress',
     key: 'progress',
+    render: (_, { progress }) => (
+      <Progress percent={progress} />
+  ),
   },
   {
     title: 'Trạng thái',
     dataIndex: 'status',
     key: 'status',
+    render: (_, { status }) => (
+      <Tag color={(status == "Hoàn Thành" ? "green" : (status == "Đang Hoạt Động") ? "geekblue" : "volcano")} key={color}>
+        {status}
+      </Tag>
+    ),
   },
   {
     title: 'Team',
@@ -203,7 +217,7 @@ const columns: ColumnsType<DataType> = [
   ), 
   },
   {
-    title: "",           
+    title: <a href='#'><Button onClick={()=>showModal("6")} type="primary"><PlusCircleOutlined /></Button></a>,           
     key: 'action',
     render: (_, {id}) => (
       <Space size="middle">
@@ -220,8 +234,7 @@ useEffect(() => {
     .then(res => res.json())
     .then(
       (result) => {
-        setData(result);
-        // console.log(data.length)
+        setData(result)
       },
       // Note: it's important to handle errors here
       // instead of a catch() block so that we don't swallow
@@ -243,7 +256,7 @@ const [form] = Form.useForm();
     </Breadcrumb>
     <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
 
-      <Table columns={columns} dataSource={data}  style={{width: '100%'}}/>
+      <Table columns={columns} dataSource={data}  style={{width: '100%'}} pagination={{ pageSize: 3 }}/>
 
       <Modal title="Edit User" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Form {...layout} name="nest-messages" validateMessages={validateMessages} form={form}>
