@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Space, Button, Modal, Form, Input, InputNumber, Breadcrumb } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Table, Space, Button, Modal, Form, Input, InputNumber, Breadcrumb, DatePicker, Slider, TreeSelect, message } from 'antd';
 import type { ColumnsType } from 'antd/lib/table';
 import { ExclamationCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Console } from 'console';
+import moment from 'moment';
 const { confirm } = Modal;
 
 
@@ -30,18 +30,91 @@ const App: React.FC = () => {
 const [isModalVisible, setIsModalVisible] = useState(false);
 
 const [name, setName] = useState()
+const [reload, setReload] = useState(true)
 
-//đổ dữ liệu vào model
-// function setValueModel(data:DataType){
-//   console.log(data.name)
-// }
-function showModal(value:string) {
 
+const [data, setData] = useState([]);
+const dateFormatList = ['DD/MM/YYYY', 'DD/MM/YY'];
+
+const [infoTeam, setInfoTeam] = useState()
+const [idWork, setIdWork] = useState("")
+
+function showModal(id:string) {
+
+  fetch("http://127.0.0.1:8080/api/work/get/"+id)
+  .then(res => res.json())
+  .then(
+    (result) => {
+
+      form.setFieldsValue({
+        name: result.name,
+        content:  result.content,
+        progress: result.progress,
+        status: result.status,
+        start_time: moment(result.start_time, 'DD-MM-YYYY'),
+        end_time: moment(result.end_time, 'DD-MM-YYYY'),
+
+      });
+      
+      setInfoTeam(result.team)
+      setIdWork(id)
+    },
+
+    (error) => {
+      console.log(error)
+    }
+  )
+
+  
+  
   setIsModalVisible(true);
 };
 
+const success = () => {
+  message.success('Thêm thành công');
+};
+const error = () => {
+  message.error('Thất bại');
+};
+
+
 const handleOk = () => {
+
+
+  const post = {
+    'id' :idWork,
+    'name' : form.getFieldsValue().name,
+    'content' : form.getFieldsValue().content,
+    'start_time' : form.getFieldsValue().start_time.format("DD-MM-YYYY"),
+    'end_time' : form.getFieldsValue().end_time.format("DD-MM-YYYY"),
+    'progress' : form.getFieldsValue().progress,
+    'status' : form.getFieldsValue().status,
+    'team' : infoTeam
+  }
+
+
+  const requestOptions = {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(post)
+};
+
+
+fetch('http://127.0.0.1:8080/api/work/edit/'+idWork, requestOptions)
+.then(response => response.json())
+.then(()=>{
+  
+  setReload(!reload)
+  success()
   setIsModalVisible(false);
+
+},
+(error) => {
+  error()
+}
+);
+
+
 };
 
 const handleCancel = () => {
@@ -56,20 +129,7 @@ const showDeleteConfirm = (id:string) => {
     okType: 'danger',
     cancelText: 'No',
     onOk() {
-      fetch("http://103.143.143.216:5000/api/work/del/"+id)
-        .then(res => res.json())
-        .then(
-          (result) => {
-            console.log(result)
-            setData(result);
-          },
-          // Note: it's important to handle errors here
-          // instead of a catch() block so that we don't swallow
-          // exceptions from actual bugs in components.
-          (error) => {
-            console.log(error)
-          }
-        )
+     
 
       console.log('OK');
 
@@ -154,14 +214,14 @@ const columns: ColumnsType<DataType> = [
   },
 ];
 
-const [data, setData] = useState([]);
+
 useEffect(() => {
-  fetch("http://103.143.143.216:5000/api/work/all")
+  fetch("http://127.0.0.1:8080/api/work/all")
     .then(res => res.json())
     .then(
       (result) => {
-        console.log(result)
         setData(result);
+        // console.log(data.length)
       },
       // Note: it's important to handle errors here
       // instead of a catch() block so that we don't swallow
@@ -170,8 +230,10 @@ useEffect(() => {
         console.log(error)
       }
     )
-}, [])
+}, [reload])
 
+
+const [form] = Form.useForm();
 
   return (
     <>
@@ -184,21 +246,34 @@ useEffect(() => {
       <Table columns={columns} dataSource={data}  style={{width: '100%'}}/>
 
       <Modal title="Edit User" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-        <Form {...layout} name="nest-messages" validateMessages={validateMessages}>
-          <Form.Item name={['user', 'name']} label="Name" rules={[{ required: true }]}>
-            <Input name='name'/>
+        <Form {...layout} name="nest-messages" validateMessages={validateMessages} form={form}>
+          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+            <Input/>
           </Form.Item>
-          <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]}>
-            <Input />
+          <Form.Item name="content" label="Nội dung" rules={[{ required: true }]}>
+            <Input.TextArea/>
           </Form.Item>
-          <Form.Item name={['user', 'age']} label="Age" rules={[{ type: 'number', min: 0, max: 99 }]}>
-            <InputNumber />
+          <Form.Item label="Ngày bắt đầu" rules={[{ required: true }]} name="start_time">
+            <DatePicker style={{ width: '50%' }} format={dateFormatList}/>
           </Form.Item>
-          <Form.Item name={['user', 'website']} label="Website">
-            <Input />
+
+          <Form.Item label="Ngày dự kiến hoàn thành" rules={[{ required: true }]} name="end_time">
+            <DatePicker style={{ width: '50%' }}  format={dateFormatList}/>
           </Form.Item>
-          <Form.Item name={['user', 'introduction']} label="Introduction">
-            <Input.TextArea />
+
+          <Form.Item name="progress" label="Tiến Độ" rules={[{ required: true }]}>
+            <Slider/>
+          </Form.Item>
+
+
+          <Form.Item label="Trạng Thái" name="status">
+            <TreeSelect
+              treeData={[
+                { title: 'Đang Hoạt Động', value: 'Đang Hoạt Động'},
+                { title: 'Tạm Ngưng', value: 'Tạm Ngưng'},
+                { title: 'Hoàn Thành', value: 'Hoàn Thành'}
+              ]}
+            />
           </Form.Item>
           <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 10 }}>
             <Button type="primary" htmlType="submit" onClick={handleOk}>
