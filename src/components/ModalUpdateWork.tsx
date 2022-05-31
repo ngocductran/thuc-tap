@@ -45,8 +45,7 @@ export default function ModalUpdateWork(props:init){
             handleCancel()
         }
         else
-            message.error("Thay đổi thất bại")
-            
+            message.error("Thay đổi thất bại")     
     }
 
     const handleCancel = () =>{
@@ -65,16 +64,12 @@ export default function ModalUpdateWork(props:init){
                 <Form.Item label="Ngày bắt đầu" rules={[{ required: true }]} name="start_time">
                     <DatePicker style={{ width: '50%' }} format={dateFormatList}/>
                 </Form.Item>
-
                 <Form.Item label="Ngày dự kiến hoàn thành" rules={[{ required: true }]} name="end_time">
                     <DatePicker style={{ width: '50%' }}  format={dateFormatList}/>
                 </Form.Item>
-
                 <Form.Item name="progress" label="Tiến Độ" rules={[{ required: true }]}>
                     <Slider/>
                 </Form.Item>
-
-
                 <Form.Item label="Trạng Thái" name="status">
                     <TreeSelect treeData={[
                         { title: 'Đang Hoạt Động', value: 'Đang Hoạt Động'},

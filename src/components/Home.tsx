@@ -40,11 +40,10 @@ const App: React.FC = () => {
 
 	const color = NaN
 
-
 	useEffect(()=> {
-		const fetchDataAllWork = async (): Promise<void> => {
-		const data = await getAllWork("/all")
-		setData(data.data)
+		async function fetchDataAllWork(): Promise<void> {
+			const data = await getAllWork("/all")
+			setData(data.data)
 		}
 
 		fetchDataAllWork()
@@ -93,13 +92,12 @@ const App: React.FC = () => {
 			title: 'ID',
 			dataIndex: 'id',
 			key: 'id',
-			render: text => <a>{text}</a>,
+			// render: text => <a>{text}</a>,
 		},
 		{
 			title: 'Name',
 			dataIndex: 'name',
 			key: 'name',
-			render: text => <a>{text}</a>,
 		},
 		{
 			title: 'Content',
@@ -147,7 +145,7 @@ const App: React.FC = () => {
 			key: 'action',
 			render: (_, {id}) => (
 			<Space size="middle">
-				<a href='#'><Button onClick={()=>showModal(id)} type="primary"><EditOutlined /></Button></a>
+				<Button onClick={()=>showModal(id)} type="primary"><EditOutlined /></Button>
 				<ModalDeleteWork id={id} del={sendDeleteWork}></ModalDeleteWork>
 			</Space>
 			),
