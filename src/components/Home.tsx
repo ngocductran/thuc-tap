@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Table, Space, Button, Form, Breadcrumb, Progress, Tag } from 'antd'
 import type { ColumnsType } from 'antd/lib/table'
-import { EditOutlined } from '@ant-design/icons'
+import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import moment from 'moment'
 
-import { getAllWork, updateWork, getWorkByID, delWorkByID } from '../Services/api'
+import { getAllWork, updateWork, getWorkByID, delWorkByID, createWork } from '../Services/api'
+import { getAllTeam } from '../Services/apiTeam'
+
+
 import ModalUpdateWork from './ModalUpdateWork'
 import ModalDeleteWork from './ModalDeleteWork'
+import ModalCreateWork from './ModalCreateWork'
 
 
 interface DataType {
@@ -30,6 +34,8 @@ interface Team {
 const App: React.FC = () => {
 
 	const [isModalVisible, setIsModalVisible] = useState(false)
+	const [isModalVisibleCreate, setIsModalVisibleCreate] = useState(false)
+
 	const [reload, setReload] = useState(true)
 	const [data, setData] = useState([])
 
@@ -38,16 +44,26 @@ const App: React.FC = () => {
 	const [infoTeam, setInfoTeam] = useState("")
 	const [idWork, setIdWork] = useState("")
 
+	const [teams, setTeams] = useState([])
+
 	const color = NaN
 
 	useEffect(()=> {
 		async function fetchDataAllWork(): Promise<void> {
 			const data = await getAllWork("/all")
-			setData(data.data)
+			setData(data.data.reverse())
 		}
 
 		fetchDataAllWork()
 	}, [reload])
+
+	useEffect(()=>{
+		async function fetchDataAllTeam(): Promise<void> {
+			const data = await getAllTeam("/all")
+			setTeams(data.data)
+		}
+		fetchDataAllTeam()
+	},[])
 
 	async function showModal(id:string) {
 		const result = (await getWorkByID("/get/" + id)).data
@@ -87,30 +103,34 @@ const App: React.FC = () => {
 		}
 	}
 
+	function sendCreateWork(data:string){
+		try {
+			createWork("/add", data)
+			setReload(!reload)
+			return true
+		} catch (error) {
+			return false
+		}
+	}
+
 	const columns: ColumnsType<DataType> = [
 		{
-			title: 'ID',
-			dataIndex: 'id',
-			key: 'id',
-			// render: text => <a>{text}</a>,
-		},
-		{
-			title: 'Name',
+			title: 'Tên Công Việc',
 			dataIndex: 'name',
 			key: 'name',
 		},
 		{
-			title: 'Content',
+			title: 'Nội Dung Công Việc',
 			dataIndex: 'content',
 			key: 'content',
 		},
 		{
-			title: 'Bắt đầu',
+			title: 'Ngày Bắt đầu',
 			dataIndex: 'start_time',
 			key: 'start_time',
 		},
 		{
-			title: 'Kết thúc',
+			title: 'Ngày Kết thúc',
 			dataIndex: 'end_time',
 			key: 'end_time',
 		},
@@ -140,8 +160,8 @@ const App: React.FC = () => {
 			), 
 		},
 		{
-			// title: <a href='#'><Button onClick={()=>showModal("6")} type="primary"><PlusCircleOutlined /></Button></a>,
-			title: "Thêm",
+			title: <a href='#'><Button onClick={()=>setIsModalVisibleCreate(true)} type="primary"><PlusCircleOutlined /></Button></a>,
+			// title: "Thêm",
 			key: 'action',
 			render: (_, {id}) => (
 			<Space size="middle">
@@ -155,14 +175,17 @@ const App: React.FC = () => {
 	return (
 		<>
 		<Breadcrumb style={{ margin: '16px 0' }}>
-			<Breadcrumb.Item>User</Breadcrumb.Item>
+			<Breadcrumb.Item>Công Việc</Breadcrumb.Item>
 			<Breadcrumb.Item>{window.location.pathname.replace("/", "")}</Breadcrumb.Item>
 		</Breadcrumb>
 		<div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
 			<Table columns={columns} dataSource={data}  style={{width: '100%'}} pagination={{ pageSize: 3 }}/>
 			<ModalUpdateWork form={form} update={sendDataToUpdateWork} isModalVisible={isModalVisible}
 				setIsModalVisible={setIsModalVisible} infoTeam={infoTeam}/>
+			<ModalCreateWork infoTeam={teams} isModalVisible={isModalVisibleCreate} 
+			setIsModalVisible={setIsModalVisibleCreate} update={sendCreateWork}/>
 		</div>
+
 		</>
   )
 }

@@ -55,7 +55,7 @@ const App: React.FC = () => {
 	return (
 		<Layout style={{ minHeight: '100vh' }}>
 			<Sider collapsible collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
-				<div className="logo"><span>Fixbug</span></div>
+				<div className="logo"><img src='https://play-lh.googleusercontent.com/eZSTPFaVLBBhrS0wW-u7L8E8XlscgDiULgsbZLnAkfAb35B3yOxaky1to-mRcg8umWGE'/></div>
 				<Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
 			</Sider>
 			<Layout className="site-layout">
@@ -70,7 +70,7 @@ const App: React.FC = () => {
 			<Content style={{ margin: '0 16px' }}>  
 			<Home/>        
 			</Content>
-			<Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+			<Footer style={{ textAlign: 'center' }}>Đây là footer</Footer>
 		</Layout>
 	</Layout>
 	)

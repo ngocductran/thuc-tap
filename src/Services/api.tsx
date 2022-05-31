@@ -18,6 +18,10 @@ export const updateWork = (url:string, data:string) =>{
     return instance.put(url, data, {headers: headers})
 }
 
+export const createWork = (url:string, data:string) =>{
+    return instance.post(url, data, {headers: headers})
+}
+
 export const delWorkByID = (url:string) =>{
     return instance.delete(url)
 }
